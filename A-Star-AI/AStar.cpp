@@ -12,13 +12,24 @@ void updateGrid(int grid[][COL]) {
 	}
 }
 
+void move(int grid[][COL], int row, int col) {
+	for (int r = 0; r < ROW; r++) {
+		for (int c = 0; c < COL; c++) {
+			if (grid[r][c] == 5) {
+				grid[r][c] = 1;
+			}
+		}
+	}
+	grid[row][col] = 5;
+}
+
 bool isValid(int row, int col)
 {
 	return (row >= 0) && (row < ROW) &&
 		(col >= 0) && (col < COL);
 }
 
-bool isUnBlocked(int grid[][COL], int row, int col)
+bool isUnblocked(int grid[][COL], int row, int col)
 {
 	if (grid[row][col] == 1)
 		return (true);
@@ -40,7 +51,7 @@ double calculateHValue(int row, int col, Pair dest)
 		+ (col - dest.second) * (col - dest.second)));
 }
 
-void tracePath(cell cellDetails[][COL], Pair dest)
+void tracePath(int grid[][COL], cell cellDetails[][COL], Pair dest)
 {
 	cout << ("The Path is ") << endl;
 	int row = dest.first;
@@ -63,6 +74,12 @@ void tracePath(cell cellDetails[][COL], Pair dest)
 	{
 		pair<int, int> p = Path.top();
 		Path.pop();
+
+		cin.ignore();
+		move(grid, p.first, p.second);
+
+		updateGrid(grid);
+
 		cout << "-> (" << p.first << ", " << p.second << ") " << endl;
 	}
 
@@ -83,8 +100,8 @@ void aStarSearch(int grid[][COL], Pair src, Pair dest)
 		return;
 	}
 
-	if (isUnBlocked(grid, src.first, src.second) == false ||
-		isUnBlocked(grid, dest.first, dest.second) == false)
+	if (isUnblocked(grid, src.first, src.second) == false ||
+		isUnblocked(grid, dest.first, dest.second) == false)
 	{
 		cout << ("Source or the destination is blocked\n");
 		return;
@@ -131,17 +148,15 @@ void aStarSearch(int grid[][COL], Pair src, Pair dest)
 	while (!openList.empty())
 	{
 		pPair p = *openList.begin();
-
 		openList.erase(openList.begin());
 
 		i = p.second.first;
 		j = p.second.second;
 		closedList[i][j] = true;
-
 		
 		double gNew, hNew, fNew;
 
-		//----------- 1st Successor (North) ------------ 
+		// NORTH DIRECTION
  
 		if (isValid(i - 1, j) == true)
 		{
@@ -150,12 +165,12 @@ void aStarSearch(int grid[][COL], Pair src, Pair dest)
 				cellDetails[i - 1][j].parent_i = i;
 				cellDetails[i - 1][j].parent_j = j;
 				cout << ("The destination cell is found\n") << endl;
-				tracePath(cellDetails, dest);
+				tracePath(grid, cellDetails, dest);
 				foundDest = true;
 				return;
 			}
 			else if (closedList[i - 1][j] == false &&
-				isUnBlocked(grid, i - 1, j) == true)
+				isUnblocked(grid, i - 1, j) == true)
 			{
 				gNew = cellDetails[i][j].g + 1.0;
 				hNew = calculateHValue(i - 1, j, dest);
@@ -167,7 +182,6 @@ void aStarSearch(int grid[][COL], Pair src, Pair dest)
 					openList.insert(make_pair(fNew,
 						make_pair(i - 1, j)));
 
-					// Update the details of this cell 
 					cellDetails[i - 1][j].f = fNew;
 					cellDetails[i - 1][j].g = gNew;
 					cellDetails[i - 1][j].h = hNew;
@@ -177,7 +191,7 @@ void aStarSearch(int grid[][COL], Pair src, Pair dest)
 			}
 		}
 
-		//----------- 2nd Successor (South) ------------ 
+		// SOUTH DIRECTION
 
 		if (isValid(i + 1, j) == true)
 		{
@@ -186,11 +200,11 @@ void aStarSearch(int grid[][COL], Pair src, Pair dest)
 				cellDetails[i + 1][j].parent_i = i;
 				cellDetails[i + 1][j].parent_j = j;
 				cout << ("The destination cell is found\n");
-				tracePath(cellDetails, dest);
+				tracePath(grid, cellDetails, dest);
 				foundDest = true;
 				return;
 			} else if (closedList[i + 1][j] == false &&
-				isUnBlocked(grid, i + 1, j) == true)
+				isUnblocked(grid, i + 1, j) == true)
 			{
 				gNew = cellDetails[i][j].g + 1.0;
 				hNew = calculateHValue(i + 1, j, dest);
@@ -210,7 +224,7 @@ void aStarSearch(int grid[][COL], Pair src, Pair dest)
 			}
 		}
 
-		//----------- 3rd Successor (East) ------------ 
+		// EAST DIRECTION
 
 		if (isValid(i, j + 1) == true)
 		{
@@ -219,11 +233,11 @@ void aStarSearch(int grid[][COL], Pair src, Pair dest)
 				cellDetails[i][j + 1].parent_i = i;
 				cellDetails[i][j + 1].parent_j = j;
 				cout << ("The destination cell is found\n");
-				tracePath(cellDetails, dest);
+				tracePath(grid, cellDetails, dest);
 				foundDest = true;
 				return;
 			} else if (closedList[i][j + 1] == false &&
-				isUnBlocked(grid, i, j + 1) == true)
+				isUnblocked(grid, i, j + 1) == true)
 			{
 				gNew = cellDetails[i][j].g + 1.0;
 				hNew = calculateHValue(i, j + 1, dest);
@@ -244,7 +258,7 @@ void aStarSearch(int grid[][COL], Pair src, Pair dest)
 			}
 		}
 
-		//----------- 4th Successor (West) ------------ 
+		// WEST DIRECTION
 
 		if (isValid(i, j - 1) == true)
 		{
@@ -253,11 +267,11 @@ void aStarSearch(int grid[][COL], Pair src, Pair dest)
 				cellDetails[i][j - 1].parent_i = i;
 				cellDetails[i][j - 1].parent_j = j;
 				cout << ("The destination cell is found\n");
-				tracePath(cellDetails, dest);
+				tracePath(grid, cellDetails, dest);
 				foundDest = true;
 				return;
 			} else if (closedList[i][j - 1] == false &&
-				isUnBlocked(grid, i, j - 1) == true)
+				isUnblocked(grid, i, j - 1) == true)
 			{
 				gNew = cellDetails[i][j].g + 1.0;
 				hNew = calculateHValue(i, j - 1, dest);
@@ -278,7 +292,7 @@ void aStarSearch(int grid[][COL], Pair src, Pair dest)
 			}
 		}
 
-		//----------- 5th Successor (North-East) ------------ 
+		// NORTH-EAST DIRECTION
 
 		if (isValid(i - 1, j + 1) == true)
 		{
@@ -287,12 +301,12 @@ void aStarSearch(int grid[][COL], Pair src, Pair dest)
 				cellDetails[i - 1][j + 1].parent_i = i;
 				cellDetails[i - 1][j + 1].parent_j = j;
 				cout << ("The destination cell is found\n");
-				tracePath(cellDetails, dest);
+				tracePath(grid, cellDetails, dest);
 				foundDest = true;
 				return;
 			}
 			else if (closedList[i - 1][j + 1] == false &&
-				isUnBlocked(grid, i - 1, j + 1) == true)
+				isUnblocked(grid, i - 1, j + 1) == true)
 			{
 				gNew = cellDetails[i][j].g + 1.414;
 				hNew = calculateHValue(i - 1, j + 1, dest);
@@ -313,7 +327,7 @@ void aStarSearch(int grid[][COL], Pair src, Pair dest)
 			}
 		}
 
-		//----------- 6th Successor (North-West) ------------ 
+		// NORTH-WEST DIRECTION
 
 		if (isValid(i - 1, j - 1) == true)
 		{
@@ -322,12 +336,12 @@ void aStarSearch(int grid[][COL], Pair src, Pair dest)
 				cellDetails[i - 1][j - 1].parent_i = i;
 				cellDetails[i - 1][j - 1].parent_j = j;
 				cout << ("The destination cell is found\n");
-				tracePath(cellDetails, dest);
+				tracePath(grid, cellDetails, dest);
 				foundDest = true;
 				return;
 			}
 			else if (closedList[i - 1][j - 1] == false &&
-				isUnBlocked(grid, i - 1, j - 1) == true)
+				isUnblocked(grid, i - 1, j - 1) == true)
 			{
 				gNew = cellDetails[i][j].g + 1.414;
 				hNew = calculateHValue(i - 1, j - 1, dest);
@@ -348,7 +362,7 @@ void aStarSearch(int grid[][COL], Pair src, Pair dest)
 			}
 		}
 
-		//----------- 7th Successor (South-East) ------------ 
+		// SOUTH-EAST DIRECTION
 
 		if (isValid(i + 1, j + 1) == true)
 		{
@@ -357,13 +371,13 @@ void aStarSearch(int grid[][COL], Pair src, Pair dest)
 				cellDetails[i + 1][j + 1].parent_i = i;
 				cellDetails[i + 1][j + 1].parent_j = j;
 				cout << ("The destination cell is found\n");
-				tracePath(cellDetails, dest);
+				tracePath(grid, cellDetails, dest);
 				foundDest = true;
 				return;
 			}
 
 			else if (closedList[i + 1][j + 1] == false &&
-				isUnBlocked(grid, i + 1, j + 1) == true)
+				isUnblocked(grid, i + 1, j + 1) == true)
 			{
 				gNew = cellDetails[i][j].g + 1.414;
 				hNew = calculateHValue(i + 1, j + 1, dest);
@@ -384,7 +398,7 @@ void aStarSearch(int grid[][COL], Pair src, Pair dest)
 			}
 		}
 
-		//----------- 8th Successor (South-West) ------------ 
+		// SOUTH-WEST DIRECTION
 
 		if (isValid(i + 1, j - 1) == true)
 		{
@@ -393,13 +407,13 @@ void aStarSearch(int grid[][COL], Pair src, Pair dest)
 				cellDetails[i + 1][j - 1].parent_i = i;
 				cellDetails[i + 1][j - 1].parent_j = j;
 				cout << ("The destination cell is found\n");
-				tracePath(cellDetails, dest);
+				tracePath(grid, cellDetails, dest);
 				foundDest = true;
 				return;
 			}
 
 			else if (closedList[i + 1][j - 1] == false &&
-				isUnBlocked(grid, i + 1, j - 1) == true)
+				isUnblocked(grid, i + 1, j - 1) == true)
 			{
 				gNew = cellDetails[i][j].g + 1.414;
 				hNew = calculateHValue(i + 1, j - 1, dest);

@@ -25,6 +25,7 @@ bool isDestination(int row, int col, Pair dest);
 double calculateHValue(int row, int col, Pair dest);
 
 void updateGrid(int grid[][COL]);
+void move(int grid[][COL], int row, int col);
 
-void tracePath(cell cellDet[][COL], Pair dest);
+void tracePath(int grid[][COL], cell cellDet[][COL], Pair dest);
 void aStarSearch(int grid[][COL], Pair src, Pair dest);
